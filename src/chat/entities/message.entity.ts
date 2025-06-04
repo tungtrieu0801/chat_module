@@ -8,6 +8,7 @@ import {
   Index,
   OneToMany,
 } from 'typeorm';
+import { ChatRoom } from './chatroom.entity';
 
 export enum MessageType {
     TEXT = 'text',
