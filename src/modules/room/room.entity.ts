@@ -8,10 +8,10 @@ import {
   Index,
   OneToMany,
 } from 'typeorm';
-import { Message } from './message.entity';
+import { Message } from '../message/message.entity';
 
 @Entity('chat_rooms')
-export class ChatRoom {
+export class Room {
     
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -27,9 +27,6 @@ export class ChatRoom {
 
     @Column({ type: 'boolean', default: false })
     isGroup: boolean;
-
-    @Column({ type: 'jsonb', nullable: true })
-    settings: Record<string, any> | null;
 
     @Column({ type: 'uuid', nullable: true })
     createdBy: string;

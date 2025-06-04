@@ -8,7 +8,7 @@ import {
   Index,
   OneToMany,
 } from 'typeorm';
-import { ChatRoom } from './chatroom.entity';
+import { ChatRoom } from '../room/room.entity';
 
 export enum MessageType {
     TEXT = 'text',
@@ -59,6 +59,9 @@ export class Message {
 
     @Column({ default: false })
     isDeleted: boolean;
+
+    @Column({ type: 'uuid'})
+    senderId: string;
 
     @CreateDateColumn()
     createdAt: Date;
