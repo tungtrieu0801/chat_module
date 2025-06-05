@@ -8,7 +8,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { socketMiddleware } from 'src/middleware/socket.middleware';
-import { ChatService } from '../chat.service';
 import { RoomService } from 'src/modules/room/room.service';
 import { Room } from 'src/modules/room/room.entity';
 
@@ -20,7 +19,6 @@ import { Room } from 'src/modules/room/room.entity';
 })
 export class ChatGateway implements OnGatewayConnection {
   constructor(
-    private readonly chatService: ChatService,
     private readonly roomService: RoomService,
   ) { }
   @WebSocketServer()
@@ -76,18 +74,18 @@ export class ChatGateway implements OnGatewayConnection {
 
 
         // Notification for user who online but not in the room
-        for (const userId of newRoom.memberIds) {
-          // Find socket for the user
-          const userSocket = allSocketsOnlineInServer.find(
-            (socket => (socket as any).userId === userId),
-          );
-          if (userSocket && !socketsInRoom.includes(userSocket)) {
-            this.server.to((userSocket as any).userId).emit('notification', {
-              data: message,
-              from: 'server'
-            });
-          }
-        }
+        // for (const userId of newRoom.memberIds) {
+        //   // Find socket for the user
+        //   const userSocket = allSocketsOnlineInServer.find(
+        //     (socket => (socket as any).userId === userId),
+        //   );
+        //   if (userSocket && !socketsInRoom.includes(userSocket)) {
+        //     this.server.to((userSocket as any).userId).emit('notification', {
+        //       data: message,
+        //       from: 'server'
+        //     });
+        //   }
+        // }
 
       } else {
 

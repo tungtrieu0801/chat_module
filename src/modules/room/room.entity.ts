@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { Message } from '../message/message.entity';
 
-@Entity('chat_rooms')
+@Entity('room')
 export class Room {
     
     @PrimaryGeneratedColumn('uuid')
@@ -40,7 +40,7 @@ export class Room {
     @OneToMany(() => Message, message => message.room)
     messages: Message[];
 
-    @Column({ type: 'simple-array', nullable: true })
+    @Column({ name: 'memberids', type: 'simple-array', nullable: true })
     memberIds: string[];
 
 }
