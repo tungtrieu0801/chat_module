@@ -8,7 +8,7 @@ import {
   Index,
   OneToMany,
 } from 'typeorm';
-import { ChatRoom } from './chatroom.entity';
+import { Room } from '../room/room.entity';
 
 export enum MessageType {
     TEXT = 'text',
@@ -35,9 +35,9 @@ export class Message {
     @Column({ type: 'jsonb' , nullable: true })
     metadata: Record<string, any> | null;
 
-    @ManyToOne(() => ChatRoom, room => room.messages, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Room, room => room.messages, { onDelete: 'CASCADE' })
     @Index()
-    room: ChatRoom;
+    room: Room;
 
     @ManyToOne(()=> Message, { nullable: true})
     forwardedFrom: Message;
@@ -59,6 +59,9 @@ export class Message {
 
     @Column({ default: false })
     isDeleted: boolean;
+
+    @Column({ type: 'uuid'})
+    senderId: string;
 
     @CreateDateColumn()
     createdAt: Date;
