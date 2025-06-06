@@ -45,7 +45,7 @@ export class ChatGateway implements OnGatewayConnection {
     @MessageBody() message: any,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('Received message:', message);
+    console.log('Received message from:', client.id, message);
 
     // roomtype 1 is for single chat, 2 is for group chat
     if (message.roomType == 1) {
