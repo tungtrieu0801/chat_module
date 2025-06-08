@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ChatGateway } from './gateways/chat-gateway';
+import { ChatGateway } from './gateways/chat.gateway';
 import { RoomService } from './modules/room/room.service';
 import { RoomModule } from './modules/room/room.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getTypeOrmConfig } from './configs/database.config';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { getTypeOrmConfig } from './configs/database.config';
       inject: [ConfigService],
       useFactory: getTypeOrmConfig,
     }),
-    RoomModule
+    RoomModule,
+    NotificationModule
   ],
   controllers: [AppController],
   providers: [AppService, ChatGateway, RoomService],

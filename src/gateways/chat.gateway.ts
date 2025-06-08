@@ -9,13 +9,13 @@ import {
 import { Server, Socket } from 'socket.io';
 import { socketMiddleware } from 'src/middleware/socket.middleware';
 import { RoomService } from 'src/modules/room/room.service';
-import { Room } from 'src/modules/room/room.entity';
 
 @WebSocketGateway({
   cors: {
     origin: 'http://localhost:5173',
     credentials: true,
   },
+  namespace: '/chat'
 })
 export class ChatGateway implements OnGatewayConnection {
   constructor(
@@ -67,12 +67,8 @@ export class ChatGateway implements OnGatewayConnection {
           data: message,
           from: (client as any).username,
         });
-
-        
         const socketsInRoom = await this.server.in(newRoom.id).fetchSockets();
         const allSocketsOnlineInServer = await this.server.fetchSockets();
-
-
         // Notification for user who online but not in the room
         // for (const userId of newRoom.memberIds) {
         //   // Find socket for the user
@@ -88,17 +84,14 @@ export class ChatGateway implements OnGatewayConnection {
         // }
 
       } else {
-
       }
-
-
     } else {
-
     }
-
     this.server.emit('message', {
       from: 'server',
       data: message,
     });
   }
+
+  
 }
