@@ -13,6 +13,11 @@ export class RoomService {
         this.roomRepository = this.dataSource.getRepository(Room);
     }
 
+    public async getListRoom(): Promise<Room> {
+        return this.roomRepository.createQueryBuilder('room').where(':userId =  ANY(room.memberIds)', { userId}).getMany();
+        
+    }
+
     public async createRoom(data: Partial<Room>): Promise<Room> {
         const newRoom = this.roomRepository.create(data);
         return await this.roomRepository.save(newRoom);
