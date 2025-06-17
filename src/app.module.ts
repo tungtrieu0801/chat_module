@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getTypeOrmConfig } from './configs/database.config';
 import { NotificationModule } from './modules/notification/notification.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { NotificationModule } from './modules/notification/notification.module';
       useFactory: getTypeOrmConfig,
     }),
     RoomModule,
-    NotificationModule
+    NotificationModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService, ChatGateway, RoomService],

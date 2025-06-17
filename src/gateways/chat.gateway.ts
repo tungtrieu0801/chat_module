@@ -40,6 +40,19 @@ export class ChatGateway implements OnGatewayConnection {
     // });
   }
 
+  @SubscribeMessage('joinRoom')
+  async handleJoinRoom(
+    @MessageBody() roomId: string,
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log('Client joining room:', roomId, 'from:', client.id);
+    client.join(roomId);
+    this.server.to(client.id).emit('joinedRoom', {
+      roomId: roomId,
+      message: `You have joined room ${roomId}`,
+    });
+  }
+
   @SubscribeMessage('message')
   async handleMessage(
     @MessageBody() message: any,
@@ -50,9 +63,10 @@ export class ChatGateway implements OnGatewayConnection {
     // roomtype 1 is for single chat, 2 is for group chat
     if (message.roomType == 1) {
       const roomId = this.roomService.generateSingleRoomId(
-        (client as any).id,
+        (client as any).sub,
         message.receivedId,
       )
+      console.log('Single chat roomId:', roomId);
       // Check if the room already exists
       // If it doesn't, create a new room
       if (!this.roomService.checkRoomExists(roomId)) {
@@ -61,7 +75,7 @@ export class ChatGateway implements OnGatewayConnection {
           isGroup: false,
           createdAt: new Date(),
           updatedAt: new Date(),
-          memberIds: [(client as any).id, message.receivedId],
+          memberIds: [(client as any).sub, message.receivedId],
         });
         this.server.to(newRoom.id).emit('message', {
           data: message,
@@ -69,20 +83,6 @@ export class ChatGateway implements OnGatewayConnection {
         });
         const socketsInRoom = await this.server.in(newRoom.id).fetchSockets();
         const allSocketsOnlineInServer = await this.server.fetchSockets();
-        // Notification for user who online but not in the room
-        // for (const userId of newRoom.memberIds) {
-        //   // Find socket for the user
-        //   const userSocket = allSocketsOnlineInServer.find(
-        //     (socket => (socket as any).userId === userId),
-        //   );
-        //   if (userSocket && !socketsInRoom.includes(userSocket)) {
-        //     this.server.to((userSocket as any).userId).emit('notification', {
-        //       data: message,
-        //       from: 'server'
-        //     });
-        //   }
-        // }
-
       } else {
       }
     } else {
