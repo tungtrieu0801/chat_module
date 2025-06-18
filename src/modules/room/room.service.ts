@@ -3,6 +3,7 @@ import { RoomRepository } from "./room.reporsitory";
 import { Room } from "./room.entity";
 import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
 import { DataSource, Repository } from "typeorm";
+import { BaseResponseApiDto } from "src/common/response/base-response-api.dto";
 
 @Injectable()
 export class RoomService {
@@ -13,8 +14,18 @@ export class RoomService {
         this.roomRepository = this.dataSource.getRepository(Room);
     }
 
-    public async getListRoom(): Promise<Room> {
+    public async getListRoom(): Promise<Room[]> {
         return this.roomRepository.createQueryBuilder('room').where(':userId =  ANY(room.memberIds)', { userId}).getMany();
+        
+    }
+
+    public async getRoomById( id: string): Promise<BaseResponseApiDto<Room>> {
+        const room = await this.roomRepository.findOneBy({ id });
+        return {
+            data: room,
+            message: 'Room found',
+            statuCode: 200
+        }
         
     }
 
