@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { RoomRepository } from "./room.reporsitory";
 import { Room } from "./room.entity";
 import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
 import { DataSource, Repository } from "typeorm";
@@ -14,12 +13,12 @@ export class RoomService {
         this.roomRepository = this.dataSource.getRepository(Room);
     }
 
-    public async getListRoom(): Promise<Room[]> {
-        return this.roomRepository.createQueryBuilder('room').where(':userId =  ANY(room.memberIds)', { userId}).getMany();
+    public async getListRoom(userId: string): Promise<Room[]> {
+        return this.roomRepository.createQueryBuilder('room').where(':userId =  ANY(room.memberIds)', { userId }).getMany();
         
     }
 
-    public async getRoomById( id: string): Promise<BaseResponseApiDto<Room>> {
+    public async getRoomById(id: string): Promise<BaseResponseApiDto<Room>> {
         const room = await this.roomRepository.findOneBy({ id });
         return {
             data: room,

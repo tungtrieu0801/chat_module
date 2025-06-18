@@ -22,19 +22,19 @@ export class Room {
     @Column({ type: 'text', nullable: true })
     description: string | null;
     
-    @Column({ type: 'boolean', default: false })
+    @Column({ name: 'is_muted', type: 'boolean', default: false })
     isMuted: boolean;
 
-    @Column({ type: 'boolean', default: false })
+    @Column({ name: 'is_group', type: 'boolean', default: false })
     isGroup: boolean;
 
-    @Column({ type: 'uuid', nullable: true })
+    @Column({ name: 'created_by', type: 'uuid', nullable: true })
     createdBy: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ name: 'created_by' })
     createdAt: Date;
     
-    @UpdateDateColumn()
+    @UpdateDateColumn({ name: 'created_by' })
     updatedAt: Date;
     
     @OneToMany(() => Message, message => message.room)
