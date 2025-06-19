@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Room } from './room.entity';
+import { Room, RoomShema } from './room.schema';
 import { RoomService } from './room.service';
-import { RoomRepository } from './room.reporsitory';
 import { Message } from '../message/message.entity';
 import { RoomController } from './room.controller';
 import { JwtStrategy } from '../auth/strategies/jwt.strategy';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Room, RoomRepository, Message]),
+    MongooseModule.forFeature([{ name: Room.name, schema: RoomShema }])
   ],
   controllers: [RoomController],
   providers: [RoomService, JwtStrategy],

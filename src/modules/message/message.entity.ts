@@ -1,14 +1,6 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Index,
-  OneToMany,
-} from 'typeorm';
-import { Room } from '../room/room.entity';
+import { Room } from '../room/room.schema';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
 export enum MessageType {
     TEXT = 'text',
@@ -19,53 +11,55 @@ export enum MessageType {
     STICKER = 'sticker',
     OTHER = 'other',
 }
-@Entity("messages")
+
+@Schema({ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } })
 export class Message {
 
-    @PrimaryGeneratedColumn('uuid')
+    @Prop({ default: uuidv4 })
     id: string;
-    
-    @Column({ type: 'enum', enum: MessageType, default: MessageType.TEXT })
+
+    @Prop({ type: String, enum: MessageType, default: MessageType.TEXT })
     type: MessageType;
 
-    @Column({ type: 'text', nullable: true })
+    @Prop()
     content: string;
 
     // Metadata for files, stickers, etc.
-    @Column({ type: 'jsonb' , nullable: true })
-    metadata: Record<string, any> | null;
+    @Prop({ type: Object, default: null })
+    metadata: Record<string, any> | null;;
 
-    @ManyToOne(() => Room, room => room.messages, { onDelete: 'CASCADE' })
-    @Index()
-    room: Room;
+    @Prop({ name: 'room_id' })
+    roomId: string;
 
-    @ManyToOne(()=> Message, { nullable: true})
-    forwardedFrom: Message;
-
-    @Column({ type: 'jsonb', nullable: true })
+    @Prop({
+        type: [
+            {
+                userId: String,
+                emoji: String,
+            },
+        ],
+        default: [],
+    })
     reactions: Array<{
         userId: string;
         emoji: string;
     }>;
 
-    @Column({ type: 'simple-array', nullable: true })
-    mentionedUserIds: string[] | null;
+    @Prop({ type: [String], default: [] })
+    mentionedUserIds: string[];
 
-    @Column({ default: false })
+    @Prop({ name: 'is_pinned', default: false })
     isPinned: boolean;
 
-    @Column({ default: false })
+    @Prop({ name: 'is_edited', default: false })
     isEdited: boolean;
 
-    @Column({ default: false })
+    @Prop({ name: 'is_deleted', default: false })
     isDeleted: boolean;
 
-    @Column({ type: 'uuid'})
+    @Prop()
     senderId: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
-
-    @UpdateDateColumn()
-    updatedAt: Date;
 }
+
+export const RoomShema = SchemaFactory.createForClass(Room)

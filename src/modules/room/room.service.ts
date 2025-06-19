@@ -1,41 +1,41 @@
 import { Injectable } from "@nestjs/common";
-import { Room } from "./room.entity";
+import { Room, RoomDocument } from "./room.schema";
 import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
 import { DataSource, Repository } from "typeorm";
 import { BaseResponseApiDto } from "src/common/response/base-response-api.dto";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from 'mongoose';
 
 @Injectable()
 export class RoomService {
-    private roomRepository: Repository<Room>;
-    //After TypeORM 0.3.x, we can use customer repositories directly,
-    //we need take it from the data source
-    constructor(@InjectDataSource() private dataSource: DataSource) {
-        this.roomRepository = this.dataSource.getRepository(Room);
-    }
+
+    constructor(@InjectModel(Room.name) private roomModel: Model<RoomDocument>) { }
 
     public async getListRoom(userId: string): Promise<Room[]> {
-        return this.roomRepository.createQueryBuilder('room').where(':userId =  ANY(room.memberIds)', { userId }).getMany();
-        
+        return this.roomModel.find({ memberIds: userId }).exec();
+
     }
 
     public async getRoomById(id: string): Promise<BaseResponseApiDto<Room>> {
-        const room = await this.roomRepository.findOneBy({ id });
+        const room = await this.roomModel.findById(id).exec();
         return {
             data: room,
             message: 'Room found',
             statuCode: 200
         }
-        
+
     }
 
     public async createRoom(data: Partial<Room>): Promise<Room> {
-        const newRoom = this.roomRepository.create(data);
-        return await this.roomRepository.save(newRoom);
+        const newRoom = new this.roomModel(data);
+        return newRoom.save();
     }
 
     public async checkRoomExists(roomId: string): Promise<boolean> {
-        return await this.roomRepository.existsBy({ id: roomId });
+        const result =  await this.roomModel.exists({ _id: roomId });
+        return result !== null;
     }
+
 
     //Create a unique room ID for single chat rooms
     public generateSingleRoomId(firstUserId: string, secondUserId: string): string {
