@@ -62,18 +62,19 @@ export class ChatGateway implements OnGatewayConnection {
 
     // roomtype 1 is for single chat, 2 is for group chat
     if (message.roomType == 1) {
-      const roomId = this.roomService.generateSingleRoomId(
+      const roomSingleId = this.roomService.generateSingleRoomId(
         (client as any).userId,
         message.receivedId,
       );
-      console.log('Single chat roomId:', roomId);
+      console.log('Single chat roomId:', roomSingleId);
       // Check if the room already exists
       // If it doesn't, create a new room
-      if (!this.roomService.checkRoomExists(roomId)) {
+      if (!await this.roomService.checkRoomExists(roomSingleId)) {
         const newRoom = await this.roomService.createRoom({
+          roomSingleId: roomSingleId,
           isMuted: false,
           isGroup: false,
-          memberIds: [(client as any).sub, message.receivedId],
+          memberIds: [(client as any).userId, message.receivedId],
         });
         this.server.to(newRoom._id.toHexString()).emit('message', {
           data: message,
@@ -91,5 +92,5 @@ export class ChatGateway implements OnGatewayConnection {
     });
   }
 
-  
+
 }
