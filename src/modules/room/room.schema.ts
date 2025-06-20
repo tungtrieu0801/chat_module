@@ -7,11 +7,14 @@ export type RoomDocument = HydratedDocument<Room>;
 @Schema({ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } })
 export class Room {
 
+  @Prop({ name: 'room_single_id' })
+  roomSingleId: string;
+
   @Prop()
   name: string;
 
   @Prop()
-  description: string | null;
+  description: string;
 
   @Prop({ name: 'is_muted' })
   isMuted: boolean;

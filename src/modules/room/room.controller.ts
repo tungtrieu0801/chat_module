@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { RoomService } from "./room.service";
 import { JwtAuthGuard } from "../auth/guard/jwt.guard";
+import { Room } from "./room.schema";
 
 @Controller('room')
 export class RoomController {
@@ -20,4 +21,9 @@ export class RoomController {
     public async getRoomDetailById(@Param('id') id: string) {
         return await this.roomService.getRoomById(id);
     }
+
+    @Post('create')
+    async createRoom(@Body() body: Partial<Room>) {
+    return await this.roomService.createRoom(body);
+  }
 }

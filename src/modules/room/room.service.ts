@@ -26,13 +26,14 @@ export class RoomService {
 
     }
 
-    public async createRoom(data: Partial<Room>): Promise<Room> {
+    public async createRoom(data: Partial<Room>): Promise<RoomDocument> {
         const newRoom = new this.roomModel(data);
         return newRoom.save();
     }
 
     public async checkRoomExists(roomId: string): Promise<boolean> {
-        const result =  await this.roomModel.exists({ _id: roomId });
+        const result =  await this.roomModel.exists({ roomSingleId: roomId });
+        console.log("ket qua", result !== null)
         return result !== null;
     }
 

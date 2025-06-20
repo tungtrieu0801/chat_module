@@ -6,20 +6,19 @@ import { RoomService } from './modules/room/room.service';
 import { RoomModule } from './modules/room/room.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { getTypeOrmConfig } from './configs/database.config';
-import { NotificationModule } from './modules/notification/notification.module';
+import { getMongooseConfig } from './configs/database.config';
 import { UserModule } from './modules/user/user.module';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true}),
-    TypeOrmModule.forRootAsync({
+    MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: getTypeOrmConfig,
+      useFactory: getMongooseConfig,
     }),
     RoomModule,
-    NotificationModule,
     UserModule
   ],
   controllers: [AppController],

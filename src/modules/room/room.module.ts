@@ -13,6 +13,6 @@ import { MongooseModule } from '@nestjs/mongoose';
   ],
   controllers: [RoomController],
   providers: [RoomService, JwtStrategy],
-  exports: [RoomService],
+  exports: [RoomService, MongooseModule],
 })
 export class RoomModule {}

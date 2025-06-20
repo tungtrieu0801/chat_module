@@ -1,16 +1,9 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import { MongooseModuleOptions } from '@nestjs/mongoose';
 
-export const getTypeOrmConfig = (config: ConfigService): TypeOrmModuleOptions => ({
-  type: 'postgres',
-  host: config.get<string>('DB_HOST'),
-  port: Number((config.get<string>('DB_PORT') || '5432').trim()),
-  username: config.get<string>('DB_USERNAME'),
-  password: config.get<string>('DB_PASSWORD'),
-  database: config.get<string>('DB_NAME'),
-  autoLoadEntities: true,
-  synchronize: false, // Set to true only in development, false in production
-  // ssl: {
-  //   rejectUnauthorized: true, // Set to true if you want to enforce SSL certificate validation
-  // },
+export const getMongooseConfig = (config: ConfigService): MongooseModuleOptions => ({
+  uri: config.get<string>('DB_HOST'),
+  user: config.get<string>('DB_USERNAME'),
+  pass: config.get<string>('DB_PASSWORD'),
+  dbName: config.get<string>('DB_NAME'),
 });

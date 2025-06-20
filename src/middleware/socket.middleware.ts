@@ -13,6 +13,7 @@ export function socketMiddleware(secret: string) {
             console.log("Payload:", payload);
             (socket as any).userId = payload.sub;
             (socket as any).username = payload.username;
+            console.log("id la: ", (socket as any).userId)
             next();
         }
     }   
