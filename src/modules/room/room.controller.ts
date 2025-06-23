@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/comm
 import { RoomService } from "./room.service";
 import { JwtAuthGuard } from "../auth/guard/jwt.guard";
 import { Room } from "./room.schema";
+import { AuthRequest } from '../../common/interfaces';
 
 @Controller('room')
 export class RoomController {
@@ -11,7 +12,7 @@ export class RoomController {
 
     @Get('getListRoom')
     @UseGuards(JwtAuthGuard)
-    public async getListRoom(@Req() req) {
+    public async getListRoom(@Req() req: AuthRequest) {
         const userId = req.user.id;
         return await this.roomService.getListRoom(userId);
     }
