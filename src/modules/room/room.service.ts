@@ -1,52 +1,47 @@
 import { Injectable } from "@nestjs/common";
 import { Room, RoomDocument } from "./room.schema";
-import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
-import { DataSource, Repository } from "typeorm";
 import { BaseResponseApiDto } from "src/common/response/base-response-api.dto";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from 'mongoose';
 import { ROOM_MESSAGES } from "src/common/contants";
+import { RoomDto } from "./dto/room.dto";
 
 @Injectable()
 export class RoomService {
 
     constructor(@InjectModel(Room.name) private roomModel: Model<RoomDocument>) { }
 
-    public async getListRoom(userId: string): Promise<BaseResponseApiDto<Room[]>> {
+    public async getListRoom(userId: string): Promise<BaseResponseApiDto<RoomDto[]>> {
         const rooms = await this.roomModel.find({ memberIds: userId }).lean();
 
-        // 2. Tìm tất cả partnerIds trong các phòng 1v1
+        // Find partnerIds.
         const partnerIds = rooms
             .filter(room => !room.isGroup && room.memberIds.length === 2)
-            .map(room => room.memberIds.find(id => id !== userId))  // lấy id còn lại
-            .filter(Boolean); // loại bỏ undefined/null
+            .map(room => room.memberIds.find(id => id !== userId))
+            .filter(Boolean);
 
-        // 3. Lấy thông tin các partner 1 lần
-        const partners = await this.userModel.find({ _id: { $in: partnerIds } }).lean();
+        const partners = await this.roomModel.find({ _id: { $in: partnerIds } }).lean();
         const userMap = new Map(partners.map(u => [u._id.toString(), u]));
+        const result: RoomDto[] = rooms.map(room => {
+            const partnerId = room.memberIds.find(id => id !== userId);
+            const partner = partnerId ? userMap.get(partnerId) : null;
 
-        // 4. Gộp dữ liệu và phân biệt loại phòng
-        const result = rooms.map(room => {
-            if (!room.isGroup && room.memberIds.length === 2) {
-                const partnerId = room.memberIds.find(id => id !== userId);
-                const partner = userMap.get(partnerId);
-
-                return {
-                    roomId: room._id,
-                    type: '1v1',
-                    displayName: partner?.name || 'Unknown',
-                    displayAvatar: partner?.avatar || null,
-                    lastMessage: room.lastMessage || null,
-                };
-            } else {
-                return {
-                    roomId: room._id,
-                    type: 'group',
-                    displayName: room.name,
-                    displayAvatar: room.avatar || null,
-                    lastMessage: room.lastMessage || null,
-                };
-            }
+            return {
+                id: room._id.toString(),
+                roomSingleId: room.roomSingleId ?? '',
+                name: room.isGroup ? room.name : (partner?.name || 'Unknown'),
+                description: room.description ?? '',
+                isMuted: room.isMuted ?? false,
+                isGroup: room.isGroup,
+                memberIds: room.memberIds,
+                lastMessage: room.lastMessage ?? '',
+                lastMessageAt: room.lastMessageAt ?? new Date(),
+                createdBy: room.createdBy ?? '',
+                avatar: room.isGroup ? (room.avatar ?? null) : (partner?.avatar ?? null),
+                pinnedBy: room.pinnedBy ?? [],
+                unreadCounts: new Map(Object.entries(room.unreadCounts ?? {})),
+                status: room.status ?? 'active',
+            };
         });
 
         return {
