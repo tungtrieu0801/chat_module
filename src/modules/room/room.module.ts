@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Room, RoomShema } from './room.schema';
 import { RoomService } from './room.service';
 import { Message } from '../message/message.entity';
