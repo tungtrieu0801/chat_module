@@ -27,11 +27,9 @@ export class UserService {
 
   // 📌 Cập nhật user
   async update(id: string, updateData: Partial<User>): Promise<User> {
-    const user = await this.userModel.findOneAndUpdate(
-      { id },
-      updateData,
-      { new: true }
-    );
+    const user = await this.userModel.findOneAndUpdate({ id }, updateData, {
+      new: true,
+    });
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
@@ -47,11 +45,11 @@ export class UserService {
   async addFriend(userId: string, friendId: string) {
     await this.userModel.updateOne(
       { id: userId },
-      { $addToSet: { friends: friendId } }
+      { $addToSet: { friends: friendId } },
     );
     await this.userModel.updateOne(
       { id: friendId },
-      { $addToSet: { friends: userId } }
+      { $addToSet: { friends: userId } },
     );
     return { message: 'Friend added successfully' };
   }
@@ -60,11 +58,11 @@ export class UserService {
   async removeFriend(userId: string, friendId: string) {
     await this.userModel.updateOne(
       { id: userId },
-      { $pull: { friends: friendId } }
+      { $pull: { friends: friendId } },
     );
     await this.userModel.updateOne(
       { id: friendId },
-      { $pull: { friends: userId } }
+      { $pull: { friends: userId } },
     );
     return { message: 'Friend removed successfully' };
   }

@@ -15,12 +15,10 @@ import { RoomService } from 'src/modules/room/room.service';
     origin: 'http://localhost:5173',
     credentials: true,
   },
-  namespace: '/chat'
+  namespace: '/chat',
 })
 export class ChatGateway implements OnGatewayConnection {
-  constructor(
-    private readonly roomService: RoomService,
-  ) { }
+  constructor(private readonly roomService: RoomService) {}
   @WebSocketServer()
   server: Server;
 
@@ -69,7 +67,7 @@ export class ChatGateway implements OnGatewayConnection {
       console.log('Single chat roomId:', roomSingleId);
       // Check if the room already exists
       // If it doesn't, create a new room
-      if (!await this.roomService.checkRoomExists(roomSingleId)) {
+      if (!(await this.roomService.checkRoomExists(roomSingleId))) {
         const newRoom = await this.roomService.createRoom({
           roomSingleId: roomSingleId,
           isMuted: false,
@@ -91,6 +89,4 @@ export class ChatGateway implements OnGatewayConnection {
       data: message,
     });
   }
-
-
 }

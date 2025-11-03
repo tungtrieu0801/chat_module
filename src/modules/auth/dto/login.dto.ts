@@ -1,5 +1,5 @@
 export class LoginRequest {
-    username: string;
-    password: string;
-    rememberMe?: boolean;
+  username: string;
+  password: string;
+  rememberMe?: boolean;
 }

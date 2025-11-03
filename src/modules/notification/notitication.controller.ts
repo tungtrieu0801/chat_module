@@ -11,7 +11,7 @@
 
 //     @Get('all')
 //     public async getAllNotifications(
-//         @Query('userId') userId: string, 
+//         @Query('userId') userId: string,
 //         @Query('page') page: number,
 //         @Query('size') limit: number
 //     ): Promise<BaseResponseApiDto<NotificationDto[]>> {

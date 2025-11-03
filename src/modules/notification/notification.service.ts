@@ -37,7 +37,7 @@
 //             totalPages: Math.ceil(total / limit),
 //         }
 //     };
-//     }   
+//     }
 
 //     public async getDetail(notificationId: string): Promise<BaseResponseApiDto<NotificationDto>> {
 //         const notification = await this.notiRepository.findOne({

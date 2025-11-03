@@ -1,19 +1,19 @@
-import { JwtService } from "@nestjs/jwt";
+import { JwtService } from '@nestjs/jwt';
 
 export function gennerateJwtToken(
-    payload: Record<string, any>,
-    jwtService: JwtService,
+  payload: Record<string, any>,
+  jwtService: JwtService,
 ): string {
-    return jwtService.sign(payload);
+  return jwtService.sign(payload);
 }
 
 export function verifyJwtToken(
-    token: string,
-    jwtService: JwtService,
+  token: string,
+  jwtService: JwtService,
 ): Record<string, any> | null {
-    try {
-        return jwtService.verify(token);
-    } catch (error) {
-        return null;
-    }
+  try {
+    return jwtService.verify(token);
+  } catch (error) {
+    return null;
+  }
 }

@@ -7,13 +7,13 @@
 //     id: string;
 
 //     @Column({ type: 'text' })
-//     title: string;    
+//     title: string;
 
 //     @Column({ type: 'text', nullable: true })
 //     content: string | null;
 
 //     @Column({ type: 'text', nullable: true })
-//     type: string | null; 
+//     type: string | null;
 
 //     @Column({ type: 'jsonb', nullable: true })
 //     data: Record<string, any> | null;

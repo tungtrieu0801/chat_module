@@ -1,6 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from './dto';
+import {
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+} from './dto';
 import { BaseResponseApiDto } from 'src/common/response/base-response-api.dto';
 
 @Controller('auth')

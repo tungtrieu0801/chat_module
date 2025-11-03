@@ -14,20 +14,20 @@ import { QrcodeModule } from './modules/qrcode/qrcode.module';
 import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true}),
-    MongooseModule.forRootAsync({ // GIỮ LẠI CẤU HÌNH CHO MONGODB
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: getMongooseConfig,
-    }),
-    RoomModule,
-    UserModule,
-    QrcodeModule,
-    AuthModule, 
-    // Loại bỏ UserModule lặp lại
-  ],
-  controllers: [AppController],
-  providers: [AppService, ChatGateway, RoomService],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRootAsync({
+      // GIỮ LẠI CẤU HÌNH CHO MONGODB
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: getMongooseConfig,
+    }),
+    RoomModule,
+    UserModule,
+    QrcodeModule,
+    AuthModule, // Loại bỏ UserModule lặp lại
+  ],
+  controllers: [AppController],
+  providers: [AppService, ChatGateway, RoomService],
 })
 export class AppModule {}

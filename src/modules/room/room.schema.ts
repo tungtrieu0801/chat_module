@@ -1,40 +1,38 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { v4 as uuidv4 } from 'uuid';
 import { HydratedDocument } from 'mongoose';
 
 export type RoomDocument = HydratedDocument<Room>;
 
 @Schema({ timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 export class Room {
-
-  @Prop({ name: 'room_single_id' })
+  @Prop({ type: String, name: 'room_single_id' })
   roomSingleId: string;
 
-  @Prop()
+  @Prop({ type: String })
   name: string;
 
-  @Prop()
+  @Prop({ type: String })
   description: string;
 
-  @Prop({ name: 'is_muted' })
+  @Prop({ type: Boolean, name: 'is_muted' })
   isMuted: boolean;
 
-  @Prop({ name: 'is_group' })
+  @Prop({ type: Boolean, name: 'is_group' })
   isGroup: boolean;
 
   @Prop({ type: [String], default: [], name: 'member_ids' })
   memberIds: string[];
 
-  @Prop()
+  @Prop({ type: String })
   lastMessage: string;
 
-  @Prop()
+  @Prop({ type: Date })
   lastMessageAt: Date;
 
-  @Prop()
+  @Prop({ type: String })
   createdBy: string;
 
-  @Prop()
+  @Prop({ type: String })
   avatar: string;
 
   @Prop({ type: [String], default: [] })
@@ -43,8 +41,8 @@ export class Room {
   @Prop({ type: Map, of: Number, default: {} })
   unreadCounts: Map<string, number>;
 
-  @Prop()
+  @Prop({ type: String })
   status: string;
 }
 
-export const RoomShema = SchemaFactory.createForClass(Room);
+export const RoomSchema = SchemaFactory.createForClass(Room);
