@@ -22,7 +22,7 @@ async function bootstrap() {
     credentials: true, // nếu bạn dùng cookie, session
   });
   await app.listen(process.env.PORT ?? 3000);
-  console.log(`🚀 Server is running on: http://localhost:3000`);
+  console.log(`🚀 Server is running on port: ${process.env.PORT}`);
   console.log(`📘 Swagger docs: http://localhost:3000/api-docs`);
 }
 bootstrap();
