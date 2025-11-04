@@ -1,7 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './user.entity';
+import { MongoServerError } from 'mongodb';
 
 @Injectable()
 export class UserService {
@@ -10,7 +16,14 @@ export class UserService {
   // 📌 Tạo user mới
   async create(data: Partial<User>): Promise<User> {
     const user = new this.userModel(data);
-    return user.save();
+    try {
+      return await user.save();
+    } catch (error) {
+      if (error instanceof MongoServerError && error.code === 11000) {
+        throw new ConflictException('User already exists');
+      }
+      throw new InternalServerErrorException('Failed to create user');
+    }
   }
 
   // 📌 Lấy danh sách user
@@ -20,8 +33,10 @@ export class UserService {
 
   // 📌 Lấy chi tiết user theo id
   async findById(id: string): Promise<User> {
-    const user = await this.userModel.findOne({ id }).lean();
-    if (!user) throw new NotFoundException('User not found');
+    const user: User | null = await this.userModel.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return user;
   }
 
@@ -72,5 +87,9 @@ export class UserService {
     const user = await this.findById(userId);
     if (!user.friends || user.friends.length === 0) return [];
     return this.userModel.find({ id: { $in: user.friends } }).lean();
+  }
+
+  async findOne(filter: Record<string, any>): Promise<User | null > {
+    return this.userModel.findOne(filter).exec();
   }
 }

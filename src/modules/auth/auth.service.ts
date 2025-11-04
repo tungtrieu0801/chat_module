@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   LoginRequest,
   LoginResponse,
@@ -7,56 +11,83 @@ import {
 } from './dto';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { gennerateJwtToken } from 'src/utils';
+import * as bcrypt from 'bcrypt';
 import { BaseResponseApiDto } from 'src/common/response/base-response-api.dto';
 import { STATUS_CODE } from 'src/common/contants';
 import { USER_MESSAGES } from 'src/common/constants';
 import { plainToInstance } from 'class-transformer';
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
   ) {}
 
-  // public async login (loginRequest: LoginRequest): Promise<BaseResponseApiDto<LoginResponse>> {
+  public async login (loginRequest: LoginRequest): Promise<LoginResponse> {
+    const { username, password } = loginRequest;
 
-  //     // const user = await this.userService.validateUser(loginRequest);
-  //     if (!user) {
-  //         return {
-  //             statuCode: STATUS_CODE.UNAUTHORIZED,
-  //             message: USER_MESSAGES.INVALID_CREDENTIALS,
-  //             data: null,
-  //         };
-  //     }
+    // 🔹 Tìm user theo username hoặc email
+    const user =
+      (await this.userService.findOne({ username })) ||
+      (await this.userService.findOne({ email: username }));
 
-  //     const payLoad = {
-  //         sub: user.id,
-  //         username: user.username,
-  //     }
-  //     const accessToken = gennerateJwtToken(payLoad, this.jwtService);
+    if (!user) {
+      throw new UnauthorizedException(USER_MESSAGES.INVALID_CREDENTIALS);
+    }
 
-  //     const loginResponse = plainToInstance(LoginResponse, {
-  //         id: user.id,
-  //         username: user.username,
-  //         email: user.email,
-  //         phoneNumber: user.phoneNumber,
-  //         roles: user.roles.map(role => role.name),
-  //         accessToken: accessToken,
-  //         avatar: user.avatar,
-  //     })
+    // 🔹 So sánh mật khẩu
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException(USER_MESSAGES.INVALID_CREDENTIALS);
+    }
 
-  //     return {
-  //         statuCode: STATUS_CODE.OK,
-  //         message: USER_MESSAGES.LOGIN_SUCCESS,
-  //         data: loginResponse,
-  //     }
-  // }
+    // 🔹 Tạo payload JWT
+    const payload = {
+      sub: user.id,
+      username: user.username,
+    };
 
-  // public register (registerRequest: RegisterRequest): Promise<BaseResponseApiDto<RegisterResponse>> {
-  //     return this.userService.createUser(registerRequest);
-  // }
+    const accessToken = this.jwtService.sign(payload);
+
+    // 🔹 Chuẩn hóa dữ liệu trả về
+    const loginResponse: LoginResponse = plainToInstance(LoginResponse, {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      // roles: user.roles?.map((role) => role.name) ?? [],
+      avatar: user.avatar,
+      accessToken,
+    });
+
+    // 🔹 Trả về dạng BaseResponseApiDto
+    return loginResponse;
+  }
+
+  public async register(registerRequest: RegisterRequest): Promise<User> {
+    const { username, email, password } = registerRequest;
+
+    // 🔹 Kiểm tra trùng username/email
+    const existingUser =
+      (await this.userService.findOne({ username })) ||
+      (await this.userService.findOne({ email }));
+
+    if (existingUser) {
+      throw new ConflictException('User already exists');
+    }
+
+    // 🔹 Mã hoá mật khẩu
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 🔹 Lưu user mới vào DB
+    const user = await this.userService.create({
+      ...registerRequest,
+      password: hashedPassword,
+    });
+
+    return user;
+  }
 }
