@@ -1,6 +1,6 @@
-import { Room } from '../room/room.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { v4 as uuidv4 } from 'uuid';
+import { HydratedDocument } from 'mongoose';
 
 export enum MessageType {
   TEXT = 'text',
@@ -11,6 +11,7 @@ export enum MessageType {
   STICKER = 'sticker',
   OTHER = 'other',
 }
+export type MessageDocument = HydratedDocument<Message>;
 
 @Schema({ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } })
 export class Message {
@@ -60,4 +61,4 @@ export class Message {
   senderId: string;
 }
 
-export const RoomShema = SchemaFactory.createForClass(Room);
+export const MessageSchema = SchemaFactory.createForClass(Message);

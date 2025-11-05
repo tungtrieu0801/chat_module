@@ -1,14 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
 
 export type RoomDocument = HydratedDocument<Room>;
 
 @Schema({ timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 export class Room {
-
-  @Prop({ default: uuidv4 })
-  id: string;
+  @Prop({ type: String })
+  roomSingleId: string;
 
   @Prop({ type: String })
   name: string;

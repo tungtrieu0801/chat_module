@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Room, RoomDocument } from './room.schema';
@@ -14,46 +14,63 @@ export class RoomService {
   ) {}
 
   async getListRoom(userId: string): Promise<RoomDto[]> {
-    // 🔹 Lấy tất cả các phòng mà user này là thành viên
-    const rooms = await this.roomModel.find({ memberIds: userId }).lean();
-
-    // 🔹 Lọc ra các phòng 1-1 (không phải group, chỉ có 2 thành viên)
-    const singleRooms = rooms.filter(
-      (r) => !r.isGroup && r.memberIds.length === 2,
+    const rooms: RoomDocument[] = await this.roomModel.find({
+      memberIds: userId,
+    });
+    const singleRooms: RoomDocument[] = rooms.filter(
+      (r: RoomDocument): boolean => !r.isGroup && r.memberIds.length === 2,
     );
 
-    // 🔹 Lấy danh sách ID của người còn lại trong phòng
+    // Get list ID partner in single room
     const partnerIds = singleRooms
-      .map((r) => r.memberIds.find((id) => id && id !== userId))
-      .filter(Boolean);
+      .map((r: RoomDocument) =>
+        r.memberIds.find((id: string): boolean => id !== userId),
+      )
+      .filter(Boolean) as string[];
 
-    // 🔹 Lấy thông tin các user đối tác 1 lần (tránh query lặp)
-    const partners =
+    // Get all information partners
+    const partners: UserDocument[] =
       partnerIds.length > 0
-        ? await this.userModel.find({ id: { $in: partnerIds } }).lean()
+        ? await this.userModel.find({ id: { $in: partnerIds } })
         : [];
 
-    const userMap = new Map(partners.map((u) => [u.id, u]));
+    const userMap = new Map(partners.map((u: UserDocument) => [u.id, u]));
 
-    // 🔹 Trả về danh sách room DTO (có cả thông tin partner nếu là room 1-1)
+    // Return mapped rooms
     return rooms.map((r) => {
-      const partnerId = r.memberIds.find((id) => id && id !== userId);
+      const partnerId = r.memberIds.find((id) => id !== userId);
       const partner = partnerId ? userMap.get(partnerId) : null;
-      return RoomMapper.toDto(r as any as Room, partner);
+      return RoomMapper.toDto(r, partner);
     });
   }
 
-
-  async getRoomById(id: string): Promise<RoomDocument | null> {
-    return this.roomModel.findById(id);
+  async getRoomByIdIfMember(roomId: string, userId: string): Promise<Room> {
+    const room: Room | null = (await this.roomModel
+      .findOne({ _id: roomId, memberIds: userId })
+      .lean()) as Room | null;
+    if (!room) {
+      throw new ForbiddenException(
+        'Bạn không có quyền xem phòng này hoặc phòng không tồn tại',
+      );
+    }
+    return room;
   }
 
   async createRoom(data: Partial<Room>): Promise<RoomDocument> {
+    if (!data.isGroup && data.memberIds?.length === 2) {
+      const singleRoomId = this.generateSingleRoomId(
+        data.memberIds[0],
+        data.memberIds[1],
+      );
+      const existingRoom = await this.roomModel.findOne({
+        roomSingleId: singleRoomId,
+      });
+      if (existingRoom) {
+        return existingRoom;
+      }
+      data.roomSingleId = singleRoomId;
+    }
     return await this.roomModel.create(data);
-  }
-
-  async checkRoomExists(roomId: string): Promise<boolean> {
-    return !!(await this.roomModel.exists({ roomSingleId: roomId }));
   }
 
   generateSingleRoomId(firstUserId: string, secondUserId: string): string {

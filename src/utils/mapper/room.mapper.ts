@@ -1,11 +1,11 @@
-import { Room } from '../../modules/room/room.schema';
+import { Room, RoomDocument } from '../../modules/room/room.schema';
 import { RoomDto } from '../../modules/room/dto/room.dto';
 
 export class RoomMapper {
-  static toDto(room: Room, partner?: any): RoomDto {
+  static toDto(room: RoomDocument, partner?: any): RoomDto {
     return {
-      id: room.id.toString(),
-      roomSingleId: room.id ?? '',
+      id: room._id.toString(),
+      roomSingleId: room.roomSingleId ?? '',
       name: room.isGroup ? room.name : partner?.name || 'Unknown',
       description: room.description ?? '',
       isGroup: room.isGroup,

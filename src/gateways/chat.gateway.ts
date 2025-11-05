@@ -1,91 +1,102 @@
 import {
-  SubscribeMessage,
   WebSocketGateway,
-  WebSocketServer,
-  MessageBody,
+  SubscribeMessage,
   OnGatewayConnection,
+  OnGatewayDisconnect,
   ConnectedSocket,
+  MessageBody,
+  WebSocketServer,
 } from '@nestjs/websockets';
+import { Injectable, Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { socketMiddleware } from 'src/middleware/socket.middleware';
-import { RoomService } from 'src/modules/room/room.service';
+import { MessageService } from '../modules/message/message.service';
+import { Message } from '../modules/message/message.schema';
 
+@Injectable()
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:5173',
+    origin: '*',
     credentials: true,
   },
-  namespace: '/chat',
 })
-export class ChatGateway implements OnGatewayConnection {
-  constructor(private readonly roomService: RoomService) {}
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  private readonly logger = new Logger(ChatGateway.name);
+
   @WebSocketServer()
   server: Server;
 
-  afterInit() {
-    this.server.use(socketMiddleware('jwt'));
-  }
+  constructor(private readonly messageService: MessageService) {}
 
   handleConnection(client: Socket) {
-    const token = client.handshake.auth.token as string;
-    console.log('token received:', token);
-    console.log('username: ', (client as any).username);
+    this.logger.log(`Client connected: ${client.id}`);
+  }
 
-    // const userId = client.handshake.query.userId as string;
-    // this.server.to(client.id).emit(userId.toString(), {
-    //   from: 'server',
-    //   data: `Welcome user ${userId}`,
-    // });
+  handleDisconnect(client: Socket) {
+    this.logger.log(`Client disconnected: ${client.id}`);
   }
 
   @SubscribeMessage('joinRoom')
-  async handleJoinRoom(
-    @MessageBody() roomId: string,
+  handleJoinRoom(
     @ConnectedSocket() client: Socket,
+    @MessageBody() roomId: string,
   ) {
-    console.log('Client joining room:', roomId, 'from:', client.id);
-    client.join(roomId);
-    this.server.to(client.id).emit('joinedRoom', {
-      roomId: roomId,
-      message: `You have joined room ${roomId}`,
-    });
+    if (!roomId) return;
+    client.join(roomId); // Socket.IO sẽ quản lý room
+    this.logger.log(`Client ${client.id} joined room ${roomId}`);
   }
 
-  @SubscribeMessage('message')
-  async handleMessage(
-    @MessageBody() message: any,
+  @SubscribeMessage('sendMessage')
+  async handleSendMessage(
     @ConnectedSocket() client: Socket,
+    @MessageBody() payload: Partial<Message>,
   ) {
-    console.log('Received message from user:', (client as any).userId, message);
+    if (!payload?.roomId) return;
+    const message = await this.messageService.sendMessage(payload);
+    // Gửi đến tất cả client trong room
+    this.server.to(payload.roomId).emit('receiveMessage', message);
+  }
 
-    // roomtype 1 is for single chat, 2 is for group chat
-    if (message.roomType == 1) {
-      const roomSingleId = this.roomService.generateSingleRoomId(
-        (client as any).userId,
-        message.receivedId,
-      );
-      console.log('Single chat roomId:', roomSingleId);
-      // Check if the room already exists
-      // If it doesn't, create a new room
-      if (!(await this.roomService.checkRoomExists(roomSingleId))) {
-        const newRoom = await this.roomService.createRoom({
-          id: roomSingleId,
-          isGroup: false,
-          memberIds: [(client as any).userId, message.receivedId],
-        });
-        this.server.to(newRoom._id.toHexString()).emit('message', {
-          data: message,
-          from: (client as any).username,
-        });
-        const socketsInRoom = await this.server.in(newRoom.id).fetchSockets();
-        const allSocketsOnlineInServer = await this.server.fetchSockets();
-      } else {
-      }
-    } else {
-    }
-    this.server.emit('message', {
-      from: 'server',
-      data: message,
-    });
+  @SubscribeMessage('reactMessage')
+  async handleReactMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    payload?: {
+      messageId: string;
+      userId: string;
+      emoji: string;
+      roomId: string;
+    },
+  ) {
+    if (!payload?.roomId) return;
+    const updatedMessage = await this.messageService.reactToMessage(
+      payload.messageId,
+      payload.userId,
+      payload.emoji,
+    );
+    this.server.to(payload.roomId).emit('updateReaction', updatedMessage);
+  }
+
+  @SubscribeMessage('pinMessage')
+  async handlePinMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    payload?: { messageId: string; isPinned: boolean; roomId: string },
+  ) {
+    if (!payload?.roomId) return;
+    const updatedMessage = await this.messageService.togglePin(
+      payload.messageId,
+      payload.isPinned,
+    );
+    this.server.to(payload.roomId).emit('updatePin', updatedMessage);
+  }
+
+  @SubscribeMessage('deleteMessage')
+  async handleDeleteMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload?: { messageId: string; roomId: string },
+  ) {
+    if (!payload?.roomId) return;
+    await this.messageService.deleteMessage(payload.messageId);
+    this.server.to(payload.roomId).emit('deleteMessage', payload.messageId);
   }
 }

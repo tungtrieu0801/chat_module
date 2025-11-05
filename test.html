@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Socket.IO Chat Test</title>
+  <style>
+      body { font-family: Arial, sans-serif; padding: 20px; }
+      #messages { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; margin-bottom: 10px; }
+      input, button { padding: 5px; margin-right: 5px; }
+      #status { margin-bottom: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+<h1>Socket.IO Chat Test</h1>
+<div id="status">Status: Disconnected</div>
+<div id="messages"></div>
+<input type="text" id="roomId" placeholder="Room ID" />
+<input type="text" id="userId" placeholder="User ID" />
+<input type="text" id="messageInput" placeholder="Message" />
+<button id="joinBtn">Join Room</button>
+<button id="sendBtn">Send Message</button>
+
+<!-- Socket.IO client -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  // Kết nối Socket.IO
+  const socket = io('http://localhost:3000', {
+    transports: ['websocket', 'polling'],
+  });
+
+  const messagesDiv = document.getElementById('messages');
+  const statusDiv = document.getElementById('status');
+  let roomId = '';
+  let userId = '';
+
+  function appendMessage(msg) {
+    const p = document.createElement('p');
+    p.textContent = msg;
+    messagesDiv.appendChild(p);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  // Connection events
+  socket.on('connect', () => {
+    statusDiv.textContent = `Status: Connected (id: ${socket.id})`;
+    appendMessage('Connected to server');
+  });
+
+  socket.on('disconnect', () => {
+    statusDiv.textContent = 'Status: Disconnected';
+    appendMessage('Disconnected from server');
+  });
+
+  socket.on('connect_error', (err) => {
+    appendMessage('Connection error: ' + err.message);
+  });
+
+  // Server events
+  socket.on('receiveMessage', (msg) => appendMessage(`[Message] ${JSON.stringify(msg)}`));
+  socket.on('updateReaction', (msg) => appendMessage(`[Reaction] ${JSON.stringify(msg)}`));
+  socket.on('updatePin', (msg) => appendMessage(`[Pin] ${JSON.stringify(msg)}`));
+  socket.on('deleteMessage', (msg) => appendMessage(`[Delete] ${JSON.stringify(msg)}`));
+
+  // Join room
+  document.getElementById('joinBtn').onclick = () => {
+    roomId = document.getElementById('roomId').value.trim();
+    userId = document.getElementById('userId').value.trim();
+    if (!roomId || !userId) return alert('Enter roomId and userId');
+
+    socket.emit('joinRoom', roomId);
+    appendMessage(`Joined room: ${roomId}`);
+  };
+
+  // Send message
+  document.getElementById('sendBtn').onclick = () => {
+    const content = document.getElementById('messageInput').value.trim();
+    if (!roomId || !userId || !content) return alert('Enter all fields');
+
+    socket.emit('sendMessage', {
+      roomId,
+      senderId: userId,
+      content
+    });
+
+    document.getElementById('messageInput').value = '';
+  };
+</script>
+</body>
+</html>

@@ -23,8 +23,8 @@ export class RoomController {
   }
 
   @Get(':id')
-  async getRoomDetailById(@Param('id') id: string) {
-    return this.roomService.getRoomById(id);
+  async getRoomDetailById(@Param('id') id: string, @Req() req: AuthRequest) {
+    return this.roomService.getRoomByIdIfMember(id, req.user.sub);
   }
 
   @Post()
