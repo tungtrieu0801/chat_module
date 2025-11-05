@@ -7,7 +7,6 @@ import {
   LoginRequest,
   LoginResponse,
   RegisterRequest,
-  RegisterResponse,
 } from './dto';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
