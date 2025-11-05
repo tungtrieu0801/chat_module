@@ -5,6 +5,7 @@ export type UserDocument = User & Document;
 
 @Schema({ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } })
 export class User {
+
   @Prop({ default: uuidv4 })
   id: string;
 

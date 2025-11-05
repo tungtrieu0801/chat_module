@@ -69,8 +69,7 @@ export class ChatGateway implements OnGatewayConnection {
       // If it doesn't, create a new room
       if (!(await this.roomService.checkRoomExists(roomSingleId))) {
         const newRoom = await this.roomService.createRoom({
-          roomSingleId: roomSingleId,
-          isMuted: false,
+          id: roomSingleId,
           isGroup: false,
           memberIds: [(client as any).userId, message.receivedId],
         });

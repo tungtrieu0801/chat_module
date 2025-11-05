@@ -18,8 +18,8 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new ResponseWrapperInterceptor());
   app.enableCors({
-    origin: 'http://localhost:5173', // hoặc ['http://localhost:5173']
-    credentials: true, // nếu bạn dùng cookie, session
+    origin: 'http://localhost:5173',
+    credentials: true,
   });
   await app.listen(process.env.PORT ?? 3000);
   console.log(`🚀 Server is running on port: ${process.env.PORT}`);

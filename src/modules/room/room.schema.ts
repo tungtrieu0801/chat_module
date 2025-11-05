@@ -1,21 +1,20 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
 export type RoomDocument = HydratedDocument<Room>;
 
 @Schema({ timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 export class Room {
-  @Prop({ type: String, name: 'room_single_id' })
-  roomSingleId: string;
+
+  @Prop({ default: uuidv4 })
+  id: string;
 
   @Prop({ type: String })
   name: string;
 
   @Prop({ type: String })
   description: string;
-
-  @Prop({ type: Boolean, name: 'is_muted' })
-  isMuted: boolean;
 
   @Prop({ type: Boolean, name: 'is_group' })
   isGroup: boolean;

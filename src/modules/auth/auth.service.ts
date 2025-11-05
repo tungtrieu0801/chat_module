@@ -23,7 +23,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  public async login (loginRequest: LoginRequest): Promise<LoginResponse> {
+  public async login(loginRequest: LoginRequest): Promise<LoginResponse> {
     const { username, password } = loginRequest;
 
     // 🔹 Tìm user theo username hoặc email

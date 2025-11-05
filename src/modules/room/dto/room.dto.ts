@@ -3,7 +3,6 @@ export interface RoomDto {
   roomSingleId: string;
   name: string;
   description: string;
-  isMuted: boolean;
   isGroup: boolean;
   memberIds: string[];
   lastMessage: string;

@@ -8,29 +8,30 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { RoomService } from './room.service';
-import { Room } from './room.schema';
-import { AuthRequest } from '../../common/interfaces';
 import { JwtAuthGuard } from '../auth/guards';
+import { AuthRequest } from '../../common/interfaces';
+import { CreateRoomDto } from './dto/create-room.dto';
 
-@Controller('room')
+@UseGuards(JwtAuthGuard)
+@Controller('rooms')
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
-  @Get('getListRoom')
-  @UseGuards(JwtAuthGuard)
-  public async getListRoom(@Req() req: AuthRequest) {
-    const userId = req.user.id;
-    return await this.roomService.getListRoom(userId);
+  @Get()
+  async getListRoom(@Req() req: AuthRequest) {
+    return this.roomService.getListRoom(req.user.id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  public async getRoomDetailById(@Param('id') id: string) {
-    return await this.roomService.getRoomById(id);
+  async getRoomDetailById(@Param('id') id: string) {
+    return this.roomService.getRoomById(id);
   }
 
-  @Post('create')
-  async createRoom(@Body() body: Partial<Room>) {
-    return await this.roomService.createRoom(body);
+  @Post()
+  async createRoom(@Req() req: AuthRequest, @Body() body: CreateRoomDto) {
+    if (!body.memberIds.includes(req.user.id)) {
+      body.memberIds.push(req.user.id);
+    }
+    return this.roomService.createRoom(body);
   }
 }
