@@ -1,13 +1,7 @@
-import {
-  Controller,
-  Post,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Post, UseGuards, Req, Query, Get } from '@nestjs/common';
 import { QrcodeService } from './qrcode.service';
 import { JwtAuthGuard } from '../auth/guards';
+import { AuthRequest } from '../../common/interfaces/auth-request.interface';
 
 @Controller('qrcode')
 export class QrcodeController {
@@ -15,7 +9,17 @@ export class QrcodeController {
 
   @Post('/generate')
   @UseGuards(JwtAuthGuard)
-  create() {
-    return this.qrcodeService.create();
+  generateToken(@Req() req: AuthRequest) {
+    return this.qrcodeService.generateToken(req.user.sub);
+  }
+
+  @Get('/scan')
+  scanToken(@Query('token') token: string) {
+    const payload = this.qrcodeService.verifyToken(token);
+    if (!payload) {
+      return { success: false, message: 'Token không hợp lệ hoặc đã hết hạn' };
+    }
+
+    return { success: true, userId: payload.userId };
   }
 }

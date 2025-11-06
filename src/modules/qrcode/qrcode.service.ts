@@ -1,37 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateQrcodeDto } from './dto/update-qrcode.dto';
+import { JwtService } from '@nestjs/jwt';
+
+interface QrPayload {
+  userId: string;
+  iat?: number;
+  exp?: number;
+}
 
 @Injectable()
 export class QrcodeService {
-  create() {
-    return 'This action adds a new qrcode';
-  }
-
+  constructor(private readonly jwtService: JwtService) {}
   generateToken(userId: string): string {
     return this.jwtService.sign({ userId });
   }
 
-  verifyToken(token: string): { userId: string } | null {
+  verifyToken(token: string): QrPayload | null {
     try {
-      return this.jwtService.verify(token) as { userId: string };
+      return this.jwtService.verify<QrPayload>(token);
     } catch (err) {
+      console.log(err);
       return null;
     }
-  }
-
-  findAll() {
-    return `This action returns all qrcode`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} qrcode`;
-  }
-
-  update(id: number, updateQrcodeDto: UpdateQrcodeDto) {
-    return `This action updates a #${id} qrcode`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} qrcode`;
   }
 }
