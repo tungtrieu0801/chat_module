@@ -9,7 +9,7 @@ export class QrcodeController {
 
   @Post('/generate')
   @UseGuards(JwtAuthGuard)
-  generateToken(@Req() req: AuthRequest) {
+  generateToken(@Req() req: AuthRequest): string {
     return this.qrcodeService.generateToken(req.user.sub);
   }
 

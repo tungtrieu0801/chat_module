@@ -28,7 +28,7 @@ import { FriendshipModule } from './modules/friendship/friendship.module';
     RoomModule,
     UserModule,
     QrcodeModule,
-    AuthModule, // Loại bỏ UserModule lặp lại
+    AuthModule,
     MessageModule,
     FriendshipModule,
   ],
