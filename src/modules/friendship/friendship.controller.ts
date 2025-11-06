@@ -13,7 +13,7 @@ export class FriendshipController {
     @Param('receiverId') receiverId: string,
     @Req() req: AuthRequest,
   ) {
-    const requesterId = req.user.sub; // ✅ Lấy từ JWT payload
+    const requesterId = req.user.sub;
     return this.friendService.sendFriendRequest(requesterId, receiverId);
   }
 

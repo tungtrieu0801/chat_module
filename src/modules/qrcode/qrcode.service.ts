@@ -1,11 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { CreateQrcodeDto } from './dto/create-qrcode.dto';
 import { UpdateQrcodeDto } from './dto/update-qrcode.dto';
 
 @Injectable()
 export class QrcodeService {
   create() {
     return 'This action adds a new qrcode';
+  }
+
+  generateToken(userId: string): string {
+    return this.jwtService.sign({ userId });
+  }
+
+  verifyToken(token: string): { userId: string } | null {
+    try {
+      return this.jwtService.verify(token) as { userId: string };
+    } catch (err) {
+      return null;
+    }
   }
 
   findAll() {
