@@ -13,6 +13,8 @@ import { QrcodeModule } from './modules/qrcode/qrcode.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ChatGateway } from './gateways/chat.gateway';
 import { MessageModule } from './modules/message/message.module';
+import { SocketEmitterService } from './gateways/socket-emitter.service';
+import { FriendshipModule } from './modules/friendship/friendship.module';
 
 @Module({
   imports: [
@@ -28,8 +30,9 @@ import { MessageModule } from './modules/message/message.module';
     QrcodeModule,
     AuthModule, // Loại bỏ UserModule lặp lại
     MessageModule,
+    FriendshipModule,
   ],
   controllers: [AppController],
-  providers: [AppService, RoomService, ChatGateway],
+  providers: [AppService, RoomService, ChatGateway, SocketEmitterService],
 })
 export class AppModule {}

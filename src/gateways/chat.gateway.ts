@@ -6,11 +6,13 @@ import {
   ConnectedSocket,
   MessageBody,
   WebSocketServer,
+  OnGatewayInit,
 } from '@nestjs/websockets';
 import { Injectable, Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from '../modules/message/message.service';
 import { Message } from '../modules/message/message.schema';
+import { SocketEmitterService } from './socket-emitter.service';
 
 @Injectable()
 @WebSocketGateway({
@@ -19,16 +21,30 @@ import { Message } from '../modules/message/message.schema';
     credentials: true,
   },
 })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   private readonly logger = new Logger(ChatGateway.name);
 
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private emitter: SocketEmitterService,
+  ) {}
+  afterInit() {
+    this.emitter.setServer(this.server);
+  }
 
   handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
+    const userId = client.handshake.query.userId as string;
+    if (userId) {
+      this.emitter.registerUser(userId, client.id);
+      console.log(`✅ User ${userId} connected (${client.id})`);
+    } else {
+      console.warn(`⚠️ Missing userId for socket ${client.id}`);
+    }
   }
 
   handleDisconnect(client: Socket) {
@@ -36,12 +52,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinRoom')
-  handleJoinRoom(
+  async handleJoinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() roomId: string,
-  ) {
+  ): Promise<void> {
     if (!roomId) return;
-    client.join(roomId); // Socket.IO sẽ quản lý room
+    await client.join(roomId);
     this.logger.log(`Client ${client.id} joined room ${roomId}`);
   }
 

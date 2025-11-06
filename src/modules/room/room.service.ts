@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Room, RoomDocument } from './room.schema';
 import { RoomDto } from './dto/room.dto';
 import { RoomMapper } from '../../utils/mapper/room.mapper';
@@ -34,11 +34,12 @@ export class RoomService {
         ? await this.userModel.find({ id: { $in: partnerIds } })
         : [];
 
-    const userMap = new Map(partners.map((u: UserDocument) => [u.id, u]));
+    const userMap = new Map(partners.map((u: UserDocument) => [u._id, u]));
 
     // Return mapped rooms
     return rooms.map((r) => {
-      const partnerId = r.memberIds.find((id) => id !== userId);
+      const partnerId = r.memberIds.find((_id) => _id !== userId);
+      // @ts-ignore
       const partner = partnerId ? userMap.get(partnerId) : null;
       return RoomMapper.toDto(r, partner);
     });

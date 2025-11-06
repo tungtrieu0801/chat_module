@@ -3,11 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import {
-  LoginRequest,
-  LoginResponse,
-  RegisterRequest,
-} from './dto';
+import { LoginRequest, LoginResponse, RegisterRequest } from './dto';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -42,7 +38,7 @@ export class AuthService {
 
     // 🔹 Tạo payload JWT
     const payload = {
-      sub: user.id,
+      sub: user._id,
       username: user.username,
     };
 
@@ -50,7 +46,7 @@ export class AuthService {
 
     // 🔹 Chuẩn hóa dữ liệu trả về
     const loginResponse: LoginResponse = plainToInstance(LoginResponse, {
-      id: user.id,
+      id: user._id,
       username: user.username,
       email: user.email,
       phoneNumber: user.phoneNumber,

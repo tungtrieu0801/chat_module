@@ -89,7 +89,7 @@ export class UserService {
     return this.userModel.find({ id: { $in: user.friends } }).lean();
   }
 
-  async findOne(filter: Record<string, any>): Promise<User | null > {
-    return this.userModel.findOne(filter).exec();
+  async findOne(condition: any): Promise<UserDocument | null> {
+    return this.userModel.findOne(condition).exec();
   }
 }

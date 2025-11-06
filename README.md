@@ -1,2 +1,5 @@
-# Project setup
-- Do not import ChatGateway in many places, only import in app module and NestJs will register it for all project.
+# Name socket convention
+- domain:action:sub-action
+# List socket events:
+- system:notify:all: notify to all friends of user when user online.
+- 
