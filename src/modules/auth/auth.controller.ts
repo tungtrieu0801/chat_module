@@ -1,9 +1,6 @@
 import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import {
-  LoginRequest,
-  LoginResponse,
-} from './dto';
+import { LoginRequest, LoginResponse } from './dto';
 import { User } from '../user/user.entity';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards';
@@ -26,7 +23,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Invalid username or password'
+    description: 'Invalid username or password',
   })
   public login(@Body() loginDto: LoginRequest): Promise<LoginResponse> {
     return this.authService.login(loginDto);

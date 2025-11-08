@@ -8,6 +8,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './user.entity';
 import { MongoServerError } from 'mongodb';
+import { UserDto } from './dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -31,13 +33,15 @@ export class UserService {
     return this.userModel.find().lean();
   }
 
-  // 📌 Lấy chi tiết user theo id
-  async findById(id: string): Promise<User> {
-    const user: User | null = await this.userModel.findById(id);
+  async findById(id: string): Promise<UserDto> {
+    const user = await this.userModel.findById(id).lean();
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+
+    return plainToInstance(UserDto, user, {
+      excludeExtraneousValues: true, // chỉ lấy @Expose
+    });
   }
 
   // 📌 Cập nhật user

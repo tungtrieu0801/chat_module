@@ -6,11 +6,16 @@ import {
   Param,
   Delete,
   Put,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
+import { AuthRequest } from '../../common/interfaces/auth-request.interface';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -24,9 +29,9 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get(':id')
-  async findById(@Param('id') id: string) {
-    return this.userService.findById(id);
+  @Get('details')
+  async findById(@Req() req: AuthRequest) {
+    return this.userService.findById(req.user.sub);
   }
 
   @Put(':id')

@@ -15,6 +15,7 @@ import { ChatGateway } from './gateways/chat.gateway';
 import { MessageModule } from './modules/message/message.module';
 import { SocketEmitterService } from './gateways/socket-emitter.service';
 import { FriendshipModule } from './modules/friendship/friendship.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { FriendshipModule } from './modules/friendship/friendship.module';
     AuthModule,
     MessageModule,
     FriendshipModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService, RoomService, ChatGateway, SocketEmitterService],
