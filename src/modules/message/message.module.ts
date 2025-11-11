@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Room, RoomSchema } from '../room/room.schema';
 import { User, UserSchema } from '../user/user.entity';
 import { Message, MessageSchema } from './message.schema';
+import { MessageController } from './message.controller';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { Message, MessageSchema } from './message.schema';
       { name: Message.name, schema: MessageSchema },
     ]),
   ],
-  controllers: [],
+  controllers: [MessageController],
   providers: [MessageService], // MessageService là Provider
   exports: [MessageService], // QUAN TRỌNG: Phải export để App Module thấy
 })
