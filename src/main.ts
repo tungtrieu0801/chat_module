@@ -17,6 +17,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, configSwagger);
   SwaggerModule.setup('api-docs', app, document);
 
+  app.useWebSocketAdapter(new IoAdapter(app));
   app.useGlobalInterceptors(new ResponseWrapperInterceptor());
   app.useWebSocketAdapter(new IoAdapter(app));
   app.enableCors({
