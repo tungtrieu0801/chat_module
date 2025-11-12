@@ -57,4 +57,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }, 1000);
   }
 
+  @SubscribeMessage(SOCKET_EVENTS.MESSAGE.TYPING)
+  handleTyping(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { roomId: string, userId: string, isTyping: boolean }
+  ) {
+    // Phát lại cho tất cả user trong room, trừ sender
+    client.to(data.roomId).emit(SOCKET_EVENTS.MESSAGE.TYPING, data);
+  }
+
+
 }
