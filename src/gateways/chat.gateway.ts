@@ -8,7 +8,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { SOCKET_EVENTS } from '../common/constants/socket.constant';
-import { Message } from '../modules/message/message.schema';
 import { MessageRequestDto } from '../modules/message/dto/message.request.dto';
 
 @WebSocketGateway({
@@ -47,16 +46,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: MessageRequestDto,
   ): void {
-    console.log('💬 Message received from client:', data);
-
-    // Tạo object mới, thêm "server said" vào content
+    console.log('💬 Message received from client:', );
     const sendData = {
       ...data,
       content: `server said: ${data.content}`, // prefix server
     };
 
     setTimeout(() => {
-      this.server.to(data.roomId).emit(SOCKET_EVENTS.MESSAGE.RECEIVE, sendData);
+      this.server.to(data.roomId).emit(SOCKET_EVENTS.MESSAGE.RECEIVE, data);
     }, 1000);
   }
 
