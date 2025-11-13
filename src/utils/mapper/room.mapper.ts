@@ -6,7 +6,9 @@ export class RoomMapper {
     return {
       id: room._id.toString(),
       roomSingleId: room.roomSingleId ?? '',
-      name: room.isGroup ? room.name : partner?.name || 'Unknown',
+      name: room.isGroup
+        ? room.name
+        : partner?._doc.fullname || 'Unknown',
       description: room.description ?? '',
       isGroup: room.isGroup,
       memberIds: room.memberIds,

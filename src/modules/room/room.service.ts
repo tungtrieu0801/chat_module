@@ -29,20 +29,30 @@ export class RoomService {
       .filter(Boolean) as string[];
 
     // Get all information partners
+    const partnerObjectIds = partnerIds.map((id) => new Types.ObjectId(id));
+
     const partners: UserDocument[] =
-      partnerIds.length > 0
-        ? await this.userModel.find({ id: { $in: partnerIds } })
+      partnerObjectIds.length > 0
+        ? await this.userModel.find({ _id: { $in: partnerObjectIds } })
         : [];
 
-    const userMap = new Map(partners.map((u: UserDocument) => [u._id, u]));
+    // Tạo map với key là string thay vì ObjectId
+    const userMap = new Map(partners.map((u: UserDocument) => [u._id.toString(), u]));
 
-    // Return mapped rooms
     return rooms.map((r) => {
-      const partnerId = r.memberIds.find((_id) => _id !== userId);
-      // @ts-ignore
-      const partner = partnerId ? userMap.get(partnerId) : null;
+      let partner: UserDocument | null = null;
+
+      if (!r.isGroup && r.memberIds.length === 2) {
+        const partnerId = r.memberIds.find((_id) => _id !== userId);
+        if (partnerId) {
+          partner = userMap.get(partnerId) ?? null;
+        }
+      }
+
       return RoomMapper.toDto(r, partner);
     });
+
+
   }
 
   async getRoomByIdIfMember(roomId: string, userId: string): Promise<Room> {
