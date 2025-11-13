@@ -1,12 +1,20 @@
 export const SOCKET_EVENTS = {
-  ROOM: {
-    JOIN: 'room:join',
-    LEAVE: 'room:leave',
+  EMIT: {
+    ROOM: {
+      JOIN: 'room:join',
+      LEAVE: 'room:leave',
+    },
+    MESSAGE: {
+      SEND: 'message:send',
+      // TYPING: 'message:typing',
+      REACT: 'message:reacted',
+    },
   },
-  MESSAGE: {
-    SEND: 'message:send',
-    RECEIVE: 'message:receive',
-    TYPING: 'message:typing',
-  },
+  ON: {
+    MESSAGE: {
+      RECEIVE: 'message:receive',
+      REACTED: 'message:reacted',
+    }
+  }
   
 }
