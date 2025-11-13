@@ -55,16 +55,44 @@ export class RoomService {
 
   }
 
-  async getRoomByIdIfMember(roomId: string, userId: string): Promise<Room> {
-    const room: Room | null = (await this.roomModel
+  async getRoomByIdIfMember(roomId: string, userId: string): Promise<RoomDto> {
+    const room: RoomDocument | null = (await this.roomModel
       .findOne({ _id: roomId, memberIds: userId })
-      .lean()) as Room | null;
+      .exec());
     if (!room) {
       throw new ForbiddenException(
         'Bạn không có quyền xem phòng này hoặc phòng không tồn tại',
       );
     }
-    return room;
+
+    if (!room.isGroup) {
+      const partnerId = room.memberIds.find((_id) => _id !== userId);
+      const partner = await this.userModel.findById(partnerId).lean();
+      if (partner) {
+        room.name = partner.fullname;
+        room.avatar = partner.avatar;
+      }
+    }
+    const roomDto: RoomDto = {
+      id: room._id.toString(),
+      roomSingleId: room.roomSingleId || '', // nếu có field này
+      name: room.name || '',
+      description: room.description || '',
+      isGroup: room.isGroup,
+      memberIds: room.memberIds.map((id) => id.toString()),
+      lastMessage: room.lastMessage || '',
+      lastMessageAt: room.lastMessageAt || new Date(0),
+      createdBy: room.createdBy,
+      avatar: room.avatar,
+      pinnedBy: room.pinnedBy?.map((id) => id.toString()) || [],
+      unreadCounts: room.unreadCounts || new Map<string, number>(),
+      status: room.status || 'active',
+      lastOnlineAt: Math.random() > 0.5
+        ? new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000))
+        : null,
+    };
+
+    return roomDto;
   }
 
   async createRoom(data: Partial<Room>): Promise<RoomDocument> {

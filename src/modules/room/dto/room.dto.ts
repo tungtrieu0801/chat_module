@@ -12,4 +12,5 @@ export interface RoomDto {
   pinnedBy: string[];
   unreadCounts: Map<string, number>;
   status: string;
+  lastOnlineAt: Date | null;
 }

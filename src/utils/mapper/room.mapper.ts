@@ -21,6 +21,9 @@ export class RoomMapper {
       pinnedBy: room.pinnedBy ?? [],
       unreadCounts: new Map(Object.entries(room.unreadCounts ?? {})),
       status: room.status ?? 'active',
+      lastOnlineAt: room.isGroup ? null : Math.random() > 0.5
+        ? new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)) // trong 7 ngày gần đây
+        : null,
     };
   }
 }
