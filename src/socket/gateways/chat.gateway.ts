@@ -23,11 +23,12 @@ export class ChatGateway {
   handleSendMessage(@MessageBody() data) {
     setTimeout(() => {
       this.server.to(data.roomId).emit(SOCKET_EVENTS.ON.MESSAGE.RECEIVE, data);
-    }, 1000);
+    }, 2000);
   }
 
-  @SubscribeMessage(SOCKET_EVENTS.ON.MESSAGE.REACTED)
+  @SubscribeMessage(SOCKET_EVENTS.EMIT.MESSAGE.REACT)
   handleMessageReacted(@MessageBody() data) {
+    console.log('data', data);
     this.server.to(data.roomId).emit(SOCKET_EVENTS.ON.MESSAGE.REACTED, data);
   }
 }

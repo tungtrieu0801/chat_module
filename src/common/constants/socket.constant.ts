@@ -7,7 +7,7 @@ export const SOCKET_EVENTS = {
     MESSAGE: {
       SEND: 'message:send',
       // TYPING: 'message:typing',
-      REACT: 'message:reacted',
+      REACT: 'message:react',
     },
     CALL: {
       OFFER: 'call:offer',
