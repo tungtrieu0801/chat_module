@@ -11,9 +11,8 @@ import { UserModule } from './modules/user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { QrcodeModule } from './modules/qrcode/qrcode.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { ChatGateway } from './gateways/chat.gateway';
+import { ChatGateway } from './socket/gateways/chat.gateway';
 import { MessageModule } from './modules/message/message.module';
-import { SocketEmitterService } from './gateways/socket-emitter.service';
 import { FriendshipModule } from './modules/friendship/friendship.module';
 import { RedisModule } from './redis/redis.module';
 
@@ -35,6 +34,6 @@ import { RedisModule } from './redis/redis.module';
     RedisModule,
   ],
   controllers: [AppController],
-  providers: [AppService, RoomService, ChatGateway, SocketEmitterService],
+  providers: [AppService, RoomService, ChatGateway],
 })
 export class AppModule {}
