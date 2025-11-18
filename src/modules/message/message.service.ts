@@ -1,9 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Message, MessageDocument } from './message.schema';
 import { RedisService } from '../../redis/redis.service';
-import { UserService } from '../user/user.service';
 import { User, UserDocument } from '../user/user.entity';
 
 @Injectable()
@@ -79,8 +78,35 @@ export class MessageService {
   }
 
   // Gửi message mới
-  async saveMessage(data: Partial<Message>): Promise<MessageDocument> {
-    return this.messageModel.create(data);
+  async saveMessage(data: Partial<Message>): Promise<Message & { user: any }> {
+    if (!data.senderId) {
+      throw new BadRequestException('senderId is missing');
+    }
+
+    // 1️⃣ Lưu message vào MongoDB
+    const message = await this.messageModel.create(data);
+
+    // 2️⃣ Lấy thông tin user từ Redis
+    let userChat = await this.redisService.get(`user:${data.senderId}`);
+
+    // 3️⃣ Nếu Redis không có, lấy từ DB và set vào Redis
+    if (!userChat) {
+      const userFromDb = await this.userModel.findById(data.senderId).lean();
+      if (userFromDb) {
+        userChat = {
+          id: userFromDb._id.toString(),
+          fullname: userFromDb.fullname,
+          avatar: userFromDb.avatar,
+        };
+        await this.redisService.set(`user:${data.senderId}`, userChat, 3600); // TTL 1h
+      }
+    }
+
+    // 4️⃣ Trả về message kèm user
+    return {
+      ...message.toObject(),
+      user: userChat,
+    };
   }
 
   // Thêm reaction vào message

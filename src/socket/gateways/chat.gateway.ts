@@ -28,8 +28,9 @@ export class ChatGateway {
   @SubscribeMessage(SOCKET_EVENTS.EMIT.MESSAGE.SEND)
   async handleSendMessage(@MessageBody() data): Promise<void> {
     try {
-      this.server.to(data.roomId).emit(SOCKET_EVENTS.ON.MESSAGE.RECEIVE, data);
-      await this.messageService.saveMessage(data);
+      const dataResponse  = await this.messageService.saveMessage(data);
+      this.server.to(data.roomId).emit(SOCKET_EVENTS.ON.MESSAGE.RECEIVE, dataResponse);
+      console.log(dataResponse);
     } catch (e) {
       console.log(e);
     }
