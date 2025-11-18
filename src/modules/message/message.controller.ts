@@ -26,7 +26,7 @@ export class MessageController {
 
   @Post()
   async sendMessage(@Body() data: Partial<Message>): Promise<Message> {
-    return this.messageService.sendMessage(data);
+    return this.messageService.saveMessage(data);
   }
 
   @Patch(':messageId/react')

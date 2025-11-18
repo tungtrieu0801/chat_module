@@ -48,6 +48,7 @@ export class AuthService {
     const loginResponse: LoginResponse = plainToInstance(LoginResponse, {
       id: user._id,
       username: user.username,
+      fullName: user.fullname,
       email: user.email,
       phoneNumber: user.phoneNumber,
       // roles: user.roles?.map((role) => role.name) ?? [],

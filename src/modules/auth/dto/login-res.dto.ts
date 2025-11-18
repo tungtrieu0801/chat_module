@@ -21,6 +21,13 @@ export class LoginResponse {
   username: string;
 
   @ApiProperty({
+    example: 'alice robertson',
+    description: 'Full name of user',
+  })
+  @Expose()
+  fullName: string;
+
+  @ApiProperty({
     example: 'example@gmail.com',
     description: 'Email of user',
   })

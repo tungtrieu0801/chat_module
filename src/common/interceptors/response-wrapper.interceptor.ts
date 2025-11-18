@@ -1,5 +1,3 @@
-// src/common/interceptors/response-wrapper.interceptor.ts
-
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';

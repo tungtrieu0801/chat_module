@@ -8,9 +8,14 @@ import {
 import { Server, Socket } from 'socket.io';
 import { SOCKET_EVENTS } from '../../common/constants/socket.constant';
 import { ReactDto } from '../dto/react.dto';
+import { MessageService } from '../../modules/message/message.service';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class ChatGateway {
+
+  constructor(
+    private readonly messageService: MessageService,
+  ) {}
   @WebSocketServer()
   server: Server;
 
@@ -21,10 +26,13 @@ export class ChatGateway {
   }
 
   @SubscribeMessage(SOCKET_EVENTS.EMIT.MESSAGE.SEND)
-  handleSendMessage(@MessageBody() data) {
-    setTimeout(() => {
+  async handleSendMessage(@MessageBody() data): Promise<void> {
+    try {
       this.server.to(data.roomId).emit(SOCKET_EVENTS.ON.MESSAGE.RECEIVE, data);
-    }, 700);
+      await this.messageService.saveMessage(data);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   @SubscribeMessage(SOCKET_EVENTS.EMIT.MESSAGE.REACT)

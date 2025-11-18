@@ -5,9 +5,11 @@ import { Room, RoomSchema } from '../room/room.schema';
 import { User, UserSchema } from '../user/user.entity';
 import { Message, MessageSchema } from './message.schema';
 import { MessageController } from './message.controller';
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 @Module({
   imports: [
+    RedisModule,
     MongooseModule.forFeature([
       { name: Room.name, schema: RoomSchema },
       { name: User.name, schema: UserSchema },

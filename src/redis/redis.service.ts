@@ -37,4 +37,17 @@ export class RedisService {
   getClient(): Redis {
     return this.redis;
   }
+
+  /**
+   * Function get multiple keys from Redis
+   */
+  async mget<T>(keys: string[]): Promise<(T | null)[]> {
+    if (!keys.length) return [];
+    const results = await this.redis.mget(...keys); // trả về (string|null)[]
+    return results.map(item => (item ? JSON.parse(item) as T : null));
+  }
+
+  pipeline() {
+    return this.redis.pipeline();
+  }
 }
